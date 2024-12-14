@@ -1,0 +1,19 @@
+{
+  "files": [],
+  "references": [
+    {
+      "path": "./tsconfig.app.json"
+    },
+    {
+      "path": "./tsconfig.node.json"
+    }
+  ],
+  "compilerOptions": {
+    "baseUrl": ".", // Importante: la base para las rutas relativas
+    "paths": {
+      "@/*": ["./src/*"] // Define el alias @ para que apunte a la carpeta src
+    },
+    // ... otras opciones de compilación
+  },
+}
+
