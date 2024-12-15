@@ -153,16 +153,37 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             };
 
             // Enviar solicitud al endpoint de ventas
-            const response = await axios.post('http://localhost:3001/api/sales', saleData);
+            //const response = await axios.post('http://localhost:3001/api/sales', saleData);
+            const responsenet = await axios.post('http://34.136.163.22:3001/api/sales', saleData);
 
             // Mostrar mensaje de éxito
-            alert(`Venta guardada con ID: ${response.data.id}`);
+            alert(`Venta guardada con ID: ${responsenet.data.id}`);
 
             // Limpiar los productos seleccionados
             clearSales();
         } catch (error) {
-            console.error('Error al guardar la venta:', error);
-            alert('Error al guardar la venta');
+            try {
+                // Preparar los datos para enviar al backend
+                const saleData = {
+                    items: selectedProducts.map(product => ({
+                        id: product.id,
+                        name: product.name,
+                        price: product.price,
+                        quantity: product.quantity,
+                        total: product.total
+                    }))
+                };
+
+                // Enviar solicitud al endpoint de ventas
+                const response = await axios.post('http://localhost:3001/api/sales', saleData);
+
+                // Mostrar mensaje de éxito
+                alert(`Venta guardada con ID: ${response.data.id}`);
+            } catch (error) {
+                console.error('Error al guardar la venta:', error);
+                alert('Error al guardar la venta');
+                alert(error);
+            }
         }
     };
 

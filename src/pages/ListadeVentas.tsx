@@ -3,19 +3,19 @@ import axios from 'axios';
 import { ArrowLeft, FileSpreadsheet } from 'lucide-react';
 import { Button } from '../components/ui/button';
 import * as XLSX from 'xlsx';
-import { 
-    Card, 
-    CardContent, 
-    CardHeader, 
-    CardTitle 
+import {
+    Card,
+    CardContent,
+    CardHeader,
+    CardTitle
 } from '../components/ui/card';
-import { 
-    Table, 
-    TableBody, 
-    TableCell, 
-    TableHeader, 
-    TableRow, 
-    TableHead 
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHeader,
+    TableRow,
+    TableHead
 } from '../components/ui/table';
 
 interface SaleItem {
@@ -45,11 +45,17 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
     useEffect(() => {
         const fetchSales = async () => {
             try {
-                const response = await axios.get('http://localhost:3001/api/sales');
+                const response = await axios.get('http://34.136.163.22:3001/api/sales');
                 setSales(response.data);
             } catch (error) {
-                console.error('Error al obtener las ventas:', error);
-                alert('Error al obtener las ventas');
+                try {
+                    const response = await axios.get('http://localhost:3001/api/sales');
+                    setSales(response.data);
+                } catch (error) {
+                    console.error('Error al obtener las ventas:', error);
+                    alert('Error al obtener las ventas');
+                }
+
             }
         };
 
@@ -115,7 +121,7 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
             Object.entries(groupedSales).forEach(([date, salesForDate]) => {
                 // Crear el arreglo de datos para la hoja
                 const data: any[][] = [];
-                
+
                 // Agregar título
                 data.push([`Ventas del ${date}`]);
                 data.push([]); // Línea en blanco
@@ -145,11 +151,11 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
 
                 // Aplicar estilos
                 const range = XLSX.utils.decode_range(worksheet['!ref'] || 'A1');
-                
+
                 // Estilos para todas las celdas
                 for (let R = range.s.r; R <= range.e.r; R++) {
                     for (let C = range.s.c; C <= range.e.c; C++) {
-                        const cellRef = XLSX.utils.encode_cell({r: R, c: C});
+                        const cellRef = XLSX.utils.encode_cell({ r: R, c: C });
                         worksheet[cellRef] = worksheet[cellRef] || { v: '' };
                         worksheet[cellRef].s = cellStyle;
 
@@ -157,7 +163,7 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
                         if (R === 2) {
                             worksheet[cellRef].s = headerStyle;
                         }
-                        
+
                         // Estilos para filas de total
                         if (worksheet[cellRef].v && worksheet[cellRef].v.toString().includes('Total Venta')) {
                             worksheet[cellRef].s = totalRowStyle;
