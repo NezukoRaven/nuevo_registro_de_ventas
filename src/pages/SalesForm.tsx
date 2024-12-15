@@ -30,7 +30,7 @@ interface SalesFormProps {
 const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     const productList: Product[] = [
         { id: 1, name: 'Papel Couche', price: 400, promotion: { quantity: 3, price: 1000 } },
-        { id: 2, name: 'Papel Normal', price: 300, promotion: { quantity: 4, price: 1000 } },
+        { id: 2, name: 'Papel Normal', price: 300, promotion: { quantity: 5, price: 1000 } },
         { id: 3, name: 'Aro', price: 9000 },
         { id: 4, name: 'Pilas', price: 200, promotion: { quantity: 4, price: 500 } },
         { id: 5, name: 'Sobre Pequeño', price: 300, promotion: { quantity: 4, price: 1000 } },
@@ -43,7 +43,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         { id: 12, name: 'Rosas', price: 200, promotion: { quantity: 8, price: 1000 } },
         { id: 13, name: 'Dino Grande', price: 9000 },
         { id: 14, name: 'Dino Chico', price: 6000 },
-        { id: 15, name: 'Tarjetas', price: 200 },
+        { id: 15, name: 'Tarjetas', price: 100 },
     ];
 
     const [searchTerm, setSearchTerm] = useState('');
