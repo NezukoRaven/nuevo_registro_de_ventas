@@ -4,6 +4,7 @@ import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
 import { Search, ArrowLeft } from 'lucide-react';
 import * as XLSX from 'xlsx';
+import axios from 'axios';
 
 interface Promotion {
     quantity: number;
@@ -133,6 +134,38 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         XLSX.writeFile(workbook, 'ventas.xlsx');
     };
 
+    const handleSaveSale = async () => {
+        if (selectedProducts.length === 0) {
+            alert('No hay productos para guardar');
+            return;
+        }
+
+        try {
+            // Preparar los datos para enviar al backend
+            const saleData = {
+                items: selectedProducts.map(product => ({
+                    id: product.id,
+                    name: product.name,
+                    price: product.price,
+                    quantity: product.quantity,
+                    total: product.total
+                }))
+            };
+
+            // Enviar solicitud al endpoint de ventas
+            const response = await axios.post('http://localhost:3001/api/sales', saleData);
+
+            // Mostrar mensaje de éxito
+            alert(`Venta guardada con ID: ${response.data.id}`);
+
+            // Limpiar los productos seleccionados
+            clearSales();
+        } catch (error) {
+            console.error('Error al guardar la venta:', error);
+            alert('Error al guardar la venta');
+        }
+    };
+
     return (
         <body className='min-h-screen items-center w-full absolute inset-0'>
             <div className="min-h-screen items-center w-full absolute inset-0">
@@ -149,7 +182,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                             <CardTitle>Formulario de Ventas</CardTitle>
                         </div>
                         {selectedProducts.length > 0 && (
-                            <Button 
+                            <Button
                                 variant="destructive"
                                 onClick={clearSales}
                             >
@@ -250,6 +283,12 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                                 </table>
                                 <Button onClick={exportToExcel}>
                                     Exportar a Excel
+                                </Button>
+                                <Button
+                                    variant="default"
+                                    onClick={handleSaveSale}
+                                >
+                                    Guardar Venta
                                 </Button>
                             </>
                         )}

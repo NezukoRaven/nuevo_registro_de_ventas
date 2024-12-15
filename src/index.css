@@ -138,3 +138,8 @@ button:focus-visible {
     @apply bg-background text-foreground;
   }
 }
+
+div.ventas-container { 
+  max-height: 80vh; /* Ajusta el valor según necesites */
+  overflow-y: auto; 
+}

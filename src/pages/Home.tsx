@@ -5,9 +5,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 const Home: React.FC<{
     onNavigateToSalesForm?: () => void;
     onNavigateToSalesForm2?: () => void;
+    onNavigateToListadeVentas?: () => void;
 }> = ({
     onNavigateToSalesForm = () => { },
-    onNavigateToSalesForm2 = () => { }
+    onNavigateToSalesForm2 = () => { },
+    onNavigateToListadeVentas = () => { }
 }) => {
         return (
             <div className="justify-center items-center min-h-screen bg-gray-100 w-full absolute inset-0">
@@ -29,6 +31,13 @@ const Home: React.FC<{
                             className="w-full"
                         >
                             Ir a Formulario de Ventas Mamá
+                        </Button>
+                        <Button
+                            onClick={onNavigateToListadeVentas}
+                            variant="secondary"
+                            className="w-full"
+                        >
+                            Ir a la lista de Ventas
                         </Button>
                     </CardContent>
                 </Card>
