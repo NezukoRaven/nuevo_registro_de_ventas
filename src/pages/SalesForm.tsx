@@ -153,11 +153,10 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             };
 
             // Enviar solicitud al endpoint de ventas
-            //const response = await axios.post('http://localhost:3001/api/sales', saleData);
-            const responsenet = await axios.post('http://34.136.163.22:3001/api/sales', saleData);
+            const response = await axios.post('http://34.136.163.22:3001/api/sales', saleData);
 
             // Mostrar mensaje de éxito
-            alert(`Venta guardada con ID: ${responsenet.data.id}`);
+            alert(`Venta guardada con ID: ${response.data.id}`);
 
             // Limpiar los productos seleccionados
             clearSales();
