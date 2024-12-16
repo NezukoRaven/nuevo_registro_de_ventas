@@ -252,7 +252,7 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
     };
 
     return (
-        <body className='bg-blue-100 min-h-screen items-center w-full absolute inset-0'>
+        <body className='bg-blue-100 min-h-screen flex flex-col items-center w-full absolute inset-0 overflow-x-hidden'>
             <div className="bg-blue-100 container mx-auto px-4 py-6">
                 <div className="flex justify-between items-center mb-6">
                     <Button variant="outline" size="icon" onClick={onBack}>
