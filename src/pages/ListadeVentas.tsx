@@ -38,76 +38,71 @@ interface ListadeVentasProps {
     onBack: () => void;
 }
 
-const SalesTable = ({ sales, title, onExport }: { 
-    sales: { [date: string]: Sale[] }, 
+const SalesTable = ({ sales, title, onExport }: {
+    sales: { [date: string]: Sale[] },
     title: string,
-    onExport: () => void 
+    onExport: () => void
 }) => (
-    <div className="h-screen flex flex-col">
-        <div className="bg-white p-4 border-b shadow-sm">
-            <div className="container mx-auto flex justify-between items-center">
+    <Card className="w-full">
+        <CardHeader className="bg-white p-4 border-b shadow-sm">
+            <div className="flex justify-between items-center">
                 <CardTitle>{title}</CardTitle>
                 <Button onClick={onExport}>
                     <FileSpreadsheet className="mr-2 h-4 w-4" />
                     Exportar a Excel
                 </Button>
             </div>
-        </div>
-
-        <div className="flex-1 overflow-y-auto p-4">
-            <div className="container mx-auto">
-                {Object.entries(sales).map(([date, salesForDate]) => (
-                    <Card key={date} className="mb-6">
-                        <CardHeader>
-                            <CardTitle>Ventas del {date}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="overflow-x-auto">
-                            <Table>
-                                <TableHeader>
-                                    <TableRow>
-                                        <TableHead className="whitespace-nowrap">ID Venta</TableHead>
-                                        <TableHead className="whitespace-nowrap">Producto</TableHead>
-                                        <TableHead className="whitespace-nowrap">Cantidad</TableHead>
-                                        <TableHead className="whitespace-nowrap">Precio Unitario</TableHead>
-                                        <TableHead className="whitespace-nowrap">Total</TableHead>
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {salesForDate.map(sale => (
-                                        <React.Fragment key={sale.id}>
-                                            {sale.items.map((item, index) => (
-                                                <TableRow key={index}>
-                                                    {index === 0 && (
-                                                        <TableCell className="whitespace-nowrap" rowSpan={sale.items.length}>
-                                                            {sale.id}
-                                                        </TableCell>
-                                                    )}
-                                                    <TableCell className="whitespace-nowrap">{item.product_name}</TableCell>
-                                                    <TableCell className="whitespace-nowrap">{item.quantity}</TableCell>
-                                                    <TableCell className="whitespace-nowrap">${item.price}</TableCell>
-                                                    <TableCell className="whitespace-nowrap">${item.total}</TableCell>
-                                                </TableRow>
-                                            ))}
-                                            {sale.items.length > 0 && (
-                                                <TableRow>
-                                                    <TableCell colSpan={4} className="font-bold text-right">
-                                                        Total Venta:
+        </CardHeader>
+        <CardContent className="overflow-y-auto max-h-[70vh] p-4">
+            {Object.entries(sales).map(([date, salesForDate]) => (
+                <div key={date} className="mb-6">
+                    <h3 className="text-lg font-semibold mb-4">Ventas del {date}</h3>
+                    <div className="overflow-x-auto">
+                        <Table>
+                            <TableHeader>
+                                <TableRow>
+                                    <TableHead className="whitespace-nowrap">ID Venta</TableHead>
+                                    <TableHead className="whitespace-nowrap">Producto</TableHead>
+                                    <TableHead className="whitespace-nowrap">Cantidad</TableHead>
+                                    <TableHead className="whitespace-nowrap">Precio Unitario</TableHead>
+                                    <TableHead className="whitespace-nowrap">Total</TableHead>
+                                </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                                {salesForDate.map(sale => (
+                                    <React.Fragment key={sale.id}>
+                                        {sale.items.map((item, index) => (
+                                            <TableRow key={index}>
+                                                {index === 0 && (
+                                                    <TableCell className="whitespace-nowrap" rowSpan={sale.items.length}>
+                                                        {sale.id}
                                                     </TableCell>
-                                                    <TableCell className="font-bold whitespace-nowrap">
-                                                        ${sale.total_sale}
-                                                    </TableCell>
-                                                </TableRow>
-                                            )}
-                                        </React.Fragment>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </CardContent>
-                    </Card>
-                ))}
-            </div>
-        </div>
-    </div>
+                                                )}
+                                                <TableCell className="whitespace-nowrap">{item.product_name}</TableCell>
+                                                <TableCell className="whitespace-nowrap">{item.quantity}</TableCell>
+                                                <TableCell className="whitespace-nowrap">${item.price}</TableCell>
+                                                <TableCell className="whitespace-nowrap">${item.total}</TableCell>
+                                            </TableRow>
+                                        ))}
+                                        {sale.items.length > 0 && (
+                                            <TableRow>
+                                                <TableCell colSpan={4} className="font-bold text-right">
+                                                    Total Venta:
+                                                </TableCell>
+                                                <TableCell className="font-bold whitespace-nowrap">
+                                                    ${sale.total_sale}
+                                                </TableCell>
+                                            </TableRow>
+                                        )}
+                                    </React.Fragment>
+                                ))}
+                            </TableBody>
+                        </Table>
+                    </div>
+                </div>
+            ))}
+        </CardContent>
+    </Card>
 );
 
 const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
@@ -135,7 +130,7 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
                 const regularResponse = await axios.get('http://34.136.163.22:3001/api/sales')
                     .catch(() => axios.get('http://localhost:3001/api/sales'));
                 setRegularSales(regularResponse.data);
-                
+
                 // Fetch mama sales
                 const mamaResponse = await axios.get('http://34.136.163.22:3001/api/sales_mama')
                     .catch(() => axios.get('http://localhost:3001/api/sales_mama'));
@@ -257,26 +252,30 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
     };
 
     return (
-        <div className="space-y-8">
-            <div className="container mx-auto flex justify-between items-center p-4">
-                <Button variant="outline" size="icon" onClick={onBack}>
-                    <ArrowLeft className="h-4 w-4" />
-                </Button>
-                <CardTitle>Todas las Ventas</CardTitle>
+        <body className='bg-blue-100 min-h-screen items-center w-full absolute inset-0'>
+            <div className="bg-blue-100 container mx-auto px-4 py-6">
+                <div className="flex justify-between items-center mb-6">
+                    <Button variant="outline" size="icon" onClick={onBack}>
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <CardTitle>Todas las Ventas</CardTitle>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-6">
+                    <SalesTable
+                        sales={groupedRegularSales}
+                        title="Lista Ventas Silvia"
+                        onExport={() => exportToExcel(groupedRegularSales, 'silvia')}
+                    />
+
+                    <SalesTable
+                        sales={groupedMamaSales}
+                        title="Lista Ventas Mama"
+                        onExport={() => exportToExcel(groupedMamaSales, 'mama')}
+                    />
+                </div>
             </div>
-
-            <SalesTable 
-                sales={groupedRegularSales} 
-                title="Lista Ventas Silvia" 
-                onExport={() => exportToExcel(groupedRegularSales, 'silvia')} 
-            />
-
-            <SalesTable 
-                sales={groupedMamaSales} 
-                title="Lista Ventas Mama" 
-                onExport={() => exportToExcel(groupedMamaSales, 'mama')} 
-            />
-        </div>
+        </body>
     );
 };
 
