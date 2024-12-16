@@ -29,21 +29,34 @@ interface SalesFormProps {
 
 const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     const productList: Product[] = [
-        { id: 1, name: 'Papel Couche', price: 400, promotion: { quantity: 3, price: 1000 } },
-        { id: 2, name: 'Papel Normal', price: 300, promotion: { quantity: 4, price: 1000 } },
-        { id: 3, name: 'Aro', price: 9000 },
-        { id: 4, name: 'Pilas', price: 200, promotion: { quantity: 4, price: 500 } },
-        { id: 5, name: 'Sobre Pequeño', price: 300, promotion: { quantity: 4, price: 1000 } },
-        { id: 6, name: 'Sobre Mediano', price: 500 },
-        { id: 7, name: 'Sobre Grande', price: 1000 },
-        { id: 8, name: 'Scotch', price: 200, promotion: { quantity: 6, price: 1000 } },
-        { id: 9, name: 'Cinta Chica', price: 200, promotion: { quantity: 3, price: 500 } },
-        { id: 10, name: 'Cinta Grande', price: 300, promotion: { quantity: 4, price: 1000 } },
-        { id: 11, name: 'Nieves', price: 600, promotion: { quantity: 2, price: 1000 } },
-        { id: 12, name: 'Rosas', price: 200, promotion: { quantity: 8, price: 1000 } },
-        { id: 13, name: 'Dino Grande', price: 9000 },
-        { id: 14, name: 'Dino Chico', price: 6000 },
-        { id: 15, name: 'Tarjetas', price: 200 },
+        { id: 1, name: 'Smalte color trend', price: 1000 },
+        { id: 2, name: 'Esmalte cajita', price: 25000 },
+        { id: 3, name: 'Esmalte cuadrado', price: 2000 },
+        { id: 4, name: 'Mascara de pestañas', price: 5000 },
+        { id: 5, name: 'Labial liquido Power Stay 16 hrs', price: 6000 },
+        { id: 6, name: 'Delineador labios', price: 3500 },
+        { id: 7, name: 'Lip glas', price: 5000 },
+        { id: 8, name: 'Epic lip', price: 3000 },
+        { id: 9, name: 'Balsamo labial', price: 3500 },
+        { id: 10, name: '3 en 1', price: 2000 },
+        { id: 11, name: 'Ampolla capilar', price: 1000 },
+        { id: 12, name: 'Delineador dual', price: 3000 },
+        { id: 12, name: 'Delineador liquido', price: 2000 },
+        { id: 13, name: 'Polvo compacto', price: 2500 },
+        { id: 14, name: 'Sombra pequeña', price: 1500 },
+        { id: 15, name: 'Sombra mediana', price: 2000 },
+        { id: 16, name: 'Tonico facial', price: 2500 },
+        { id: 17, name: 'Agua micelar', price: 3500 },
+        { id: 18, name: 'Aceite de argon 30 ml', price: 3000 },
+        { id: 19, name: 'Cera corporal', price: 2000 },
+        { id: 20, name: 'Jabon barra', price: 3000 },
+        { id: 21, name: 'Crema para el cuerpo', price: 3500 },
+        { id: 22, name: 'desodorante crema', price: 1000 },
+        { id: 23, name: 'Macara facial', price: 3000 },
+        { id: 24, name: 'Crema manos ekos', price: 7000, promotion: { quantity: 4, price: 25000 } },
+        { id: 25, name: 'Crema cuerpo', price: 15000 },
+        { id: 26, name: 'Colonia maracuya', price: 12000 },
+        { id: 27, name: 'Crema facial anew', price: 15000 },
     ];
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -153,7 +166,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             };
 
             // Enviar solicitud al endpoint de ventas
-            const response = await axios.post('http://34.136.163.22:3001/api/sales', saleData);
+            const response = await axios.post('http://34.136.163.22:3001/api/sales_mama', saleData);
 
             // Mostrar mensaje de éxito
             alert(`Venta guardada con ID: ${response.data.id}`);
@@ -174,10 +187,10 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                 };
 
                 // Enviar solicitud al endpoint de ventas
-                const response = await axios.post('http://localhost:3001/api/sales', saleData);
-
+                const response = await axios.post('http://localhost:3001/api/sales_mama', saleData);
+                alert(response.status)
                 // Mostrar mensaje de éxito
-                alert(`Venta guardada con ID: ${response.data.id}`);
+                alert(`Venta mama guardada con ID: ${response.data.id}`);
             } catch (error) {
                 console.error('Error al guardar la venta:', error);
                 alert('Error al guardar la venta');

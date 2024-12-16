@@ -35,20 +35,35 @@ const pool = new Pool({
 const initDb = async () => {
     try {
         await pool.query(`
-      CREATE TABLE IF NOT EXISTS sales (
-        id SERIAL PRIMARY KEY,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+        CREATE TABLE IF NOT EXISTS sales (
+            id SERIAL PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
 
-      CREATE TABLE IF NOT EXISTS sale_items (
-        id SERIAL PRIMARY KEY,
-        sale_id INTEGER REFERENCES sales(id),
-        product_id INTEGER NOT NULL,
-        product_name VARCHAR(255) NOT NULL,
-        price DECIMAL(10,2) NOT NULL,
-        quantity INTEGER NOT NULL,
-        total DECIMAL(10,2) NOT NULL
-      );
+        CREATE TABLE IF NOT EXISTS sale_items (
+            id SERIAL PRIMARY KEY,
+            sale_id INTEGER REFERENCES sales(id),
+            product_id INTEGER NOT NULL,
+            product_name VARCHAR(255) NOT NULL,
+            price DECIMAL(10,2) NOT NULL,
+            quantity INTEGER NOT NULL,
+            total DECIMAL(10,2) NOT NULL
+        );
+
+        CREATE TABLE IF NOT EXISTS sales_mama (
+            id SERIAL PRIMARY KEY,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        );
+
+        CREATE TABLE IF NOT EXISTS sale_items_mama (
+            id SERIAL PRIMARY KEY,
+            sale_id INTEGER REFERENCES sales_mama(id),
+            product_id INTEGER NOT NULL,
+            product_name VARCHAR(255) NOT NULL,
+            price DECIMAL(10,2) NOT NULL,
+            quantity INTEGER NOT NULL,
+            total DECIMAL(10,2) NOT NULL
+        );
     `);
         console.log('Tablas creadas correctamente');
     } catch (error) {
@@ -118,18 +133,98 @@ app.get('/api/sales', async (_req, res) => {
         s.id, 
         s.created_at, 
         json_agg(json_build_object(
-          'id', si.id,
-          'product_id', si.product_id,
-          'product_name', si.product_name,
-          'price', si.price,
-          'quantity', si.quantity,
-          'total', si.total
+            'id', si.id,
+            'product_id', si.product_id,
+            'product_name', si.product_name,
+            'price', si.price,
+            'quantity', si.quantity,
+            'total', si.total
         )) as items,
         SUM(si.total) as total_sale
-      FROM sales s
-      JOIN sale_items si ON s.id = si.sale_id
-      GROUP BY s.id
-      ORDER BY s.created_at DESC
+    FROM sales s
+    JOIN sale_items si ON s.id = si.sale_id
+    GROUP BY s.id
+    ORDER BY s.created_at DESC
+    `);
+
+        res.json(result.rows);
+    } catch (error) {
+        console.error('Error al obtener las ventas:', error);
+        res.status(500).json({ error: 'Error al obtener las ventas' });
+    }
+});
+
+// Endpoint para crear una nueva venta
+app.post('/api/sales_mama', async (req, res) => {
+    const client = await pool.connect();
+
+    try {
+        // Iniciar transacción
+        await client.query('BEGIN');
+
+        // Crear nueva venta
+        const saleResult = await client.query(
+            'INSERT INTO sales_mama DEFAULT VALUES RETURNING id'
+        );
+        const saleId = saleResult.rows[0].id;
+
+        // Insertar items de la venta
+        const { items } = req.body;
+        for (const item of items) {
+            await client.query(
+                `INSERT INTO sale_items_mama 
+        (sale_id, product_id, product_name, price, quantity, total) 
+        VALUES ($1, $2, $3, $4, $5, $6)`,
+                [
+                    saleId,
+                    item.id,
+                    item.name,
+                    item.price,
+                    item.quantity,
+                    item.total
+                ]
+            );
+        }
+
+        // Confirmar transacción
+        await client.query('COMMIT');
+
+        res.json({
+            id: saleId,
+            message: 'Venta guardada correctamente'
+        });
+
+    } catch (error) {
+        // Revertir transacción en caso de error
+        await client.query('ROLLBACK');
+        console.error('Error al guardar la venta:', error);
+        res.status(500).json({ error: 'Error al guardar la venta' });
+    } finally {
+        // Liberar cliente de la pool
+        client.release();
+    }
+});
+
+// Endpoint para obtener todas las ventas
+app.get('/api/sales_mama', async (_req, res) => {
+    try {
+        const result = await pool.query(`
+    SELECT 
+        s.id, 
+        s.created_at, 
+        json_agg(json_build_object(
+            'id', si.id,
+            'product_id', si.product_id,
+            'product_name', si.product_name,
+            'price', si.price,
+            'quantity', si.quantity,
+            'total', si.total
+        )) as items,
+        SUM(si.total) as total_sale
+    FROM sales_mama s
+    JOIN sale_items_mama si ON s.id = si.sale_id
+    GROUP BY s.id
+    ORDER BY s.created_at DESC
     `);
 
         res.json(result.rows);
