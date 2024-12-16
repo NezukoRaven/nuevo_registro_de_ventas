@@ -38,58 +38,58 @@ interface ListadeVentasProps {
     onBack: () => void;
 }
 
-const SalesTable = ({ sales, title, onExport }: {
-    sales: { [date: string]: Sale[] },
+const SalesTable = ({ sales, title, onExport }: { 
+    sales: { [date: string]: Sale[] }, 
     title: string,
-    onExport: () => void
+    onExport: () => void 
 }) => (
     <Card className="w-full">
         <CardHeader className="bg-white p-4 border-b shadow-sm">
             <div className="flex justify-between items-center">
-                <CardTitle>{title}</CardTitle>
-                <Button onClick={onExport}>
-                    <FileSpreadsheet className="mr-2 h-4 w-4" />
-                    Exportar a Excel
+                <CardTitle className="text-sm sm:text-base">{title}</CardTitle>
+                <Button onClick={onExport} className="h-8 px-2 sm:h-10 sm:px-4">
+                    <FileSpreadsheet className="mr-1 sm:mr-2 h-3 w-3 sm:h-4 sm:w-4" />
+                    <span className="text-xs sm:text-sm">Exportar</span>
                 </Button>
             </div>
         </CardHeader>
-        <CardContent className="overflow-y-auto max-h-[70vh] p-4">
+        <CardContent className="overflow-y-auto max-h-[70vh] p-2 sm:p-4">
             {Object.entries(sales).map(([date, salesForDate]) => (
-                <div key={date} className="mb-6">
-                    <h3 className="text-lg font-semibold mb-4">Ventas del {date}</h3>
+                <div key={date} className="mb-4 sm:mb-6">
+                    <h3 className="text-sm sm:text-lg font-semibold mb-2 sm:mb-4">Ventas del {date}</h3>
                     <div className="overflow-x-auto">
-                        <Table>
+                        <Table className="text-xs sm:text-sm">
                             <TableHeader>
                                 <TableRow>
-                                    <TableHead className="whitespace-nowrap">ID Venta</TableHead>
-                                    <TableHead className="whitespace-nowrap">Producto</TableHead>
-                                    <TableHead className="whitespace-nowrap">Cantidad</TableHead>
-                                    <TableHead className="whitespace-nowrap">Precio Unitario</TableHead>
-                                    <TableHead className="whitespace-nowrap">Total</TableHead>
+                                    <TableHead className="whitespace-nowrap p-1 sm:p-2">ID</TableHead>
+                                    <TableHead className="whitespace-nowrap p-1 sm:p-2">Producto</TableHead>
+                                    <TableHead className="whitespace-nowrap p-1 sm:p-2">Cant</TableHead>
+                                    <TableHead className="whitespace-nowrap p-1 sm:p-2">Precio</TableHead>
+                                    <TableHead className="whitespace-nowrap p-1 sm:p-2">Total</TableHead>
                                 </TableRow>
                             </TableHeader>
                             <TableBody>
                                 {salesForDate.map(sale => (
                                     <React.Fragment key={sale.id}>
                                         {sale.items.map((item, index) => (
-                                            <TableRow key={index}>
+                                            <TableRow key={index} className="text-xs sm:text-sm">
                                                 {index === 0 && (
-                                                    <TableCell className="whitespace-nowrap" rowSpan={sale.items.length}>
+                                                    <TableCell className="whitespace-nowrap p-1 sm:p-2" rowSpan={sale.items.length}>
                                                         {sale.id}
                                                     </TableCell>
                                                 )}
-                                                <TableCell className="whitespace-nowrap">{item.product_name}</TableCell>
-                                                <TableCell className="whitespace-nowrap">{item.quantity}</TableCell>
-                                                <TableCell className="whitespace-nowrap">${item.price}</TableCell>
-                                                <TableCell className="whitespace-nowrap">${item.total}</TableCell>
+                                                <TableCell className="whitespace-nowrap p-1 sm:p-2 truncate max-w-[100px]">{item.product_name}</TableCell>
+                                                <TableCell className="whitespace-nowrap p-1 sm:p-2">{item.quantity}</TableCell>
+                                                <TableCell className="whitespace-nowrap p-1 sm:p-2">${item.price}</TableCell>
+                                                <TableCell className="whitespace-nowrap p-1 sm:p-2">${item.total}</TableCell>
                                             </TableRow>
                                         ))}
                                         {sale.items.length > 0 && (
                                             <TableRow>
-                                                <TableCell colSpan={4} className="font-bold text-right">
+                                                <TableCell colSpan={4} className="font-bold text-right p-1 sm:p-2 text-xs sm:text-sm">
                                                     Total Venta:
                                                 </TableCell>
-                                                <TableCell className="font-bold whitespace-nowrap">
+                                                <TableCell className="font-bold whitespace-nowrap p-1 sm:p-2 text-xs sm:text-sm">
                                                     ${sale.total_sale}
                                                 </TableCell>
                                             </TableRow>
