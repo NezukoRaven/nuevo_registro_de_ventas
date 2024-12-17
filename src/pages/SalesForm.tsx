@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Search, ArrowLeft } from 'lucide-react';
+import {
+    Popover,
+    PopoverContent,
+    PopoverTrigger
+} from '../components/ui/popover';
+import { Calendar } from '../components/ui/calendar';
+import { Search, ArrowLeft, CalendarIcon } from 'lucide-react';
+import { cn } from '../lib/utils';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 
@@ -27,6 +34,23 @@ interface SalesFormProps {
     onBack: () => void;
 }
 
+const formatDateSpanish = (date: Date) => {
+    const days = [
+        'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'
+    ];
+    const months = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+
+    const dayName = days[date.getDay()];
+    const dayNumber = date.getDate();
+    const monthName = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${dayName} ${dayNumber} de ${monthName} de ${year}`;
+};
+
 const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     const productList: Product[] = [
         { id: 1, name: 'Papel Couche', price: 400, promotion: { quantity: 3, price: 1000 } },
@@ -44,12 +68,12 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         { id: 13, name: 'Dino Grande', price: 9000 },
         { id: 14, name: 'Dino Chico', price: 6000 },
         { id: 15, name: 'Tarjetas', price: 100 },
-{ id: 16, name: 'Serpentinas', price: 700, promotion: { quantity: 3, price: 2000 } },
-{ id: 17, name: 'Cactus plomo', price: 5000 },
-{ id: 18, name: 'Cactus negro', price: 5000 },
-{ id: 19, name: 'Aloe cafe cuadrado', price: 5000 },
-{ id: 20, name: 'Cactus chico', price: 3000 },
-{ id: 21, name: 'Aloe chico', price: 3000 },
+        { id: 16, name: 'Serpentinas', price: 700, promotion: { quantity: 3, price: 2000 } },
+        { id: 17, name: 'Cactus plomo', price: 5000 },
+        { id: 18, name: 'Cactus negro', price: 5000 },
+        { id: 19, name: 'Aloe cafe cuadrado', price: 5000 },
+        { id: 20, name: 'Cactus chico', price: 3000 },
+        { id: 21, name: 'Aloe chico', price: 3000 },
     ];
 
     const [searchTerm, setSearchTerm] = useState('');
@@ -60,9 +84,16 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState<string>('');
 
+    // Nuevo estado para manejar la fecha con Date
+    const [saleDate, setSaleDate] = useState<Date>(() => {
+        const savedDate = localStorage.getItem('saleDate');
+        return savedDate ? new Date(savedDate) : new Date();
+    });
+
     useEffect(() => {
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
-    }, [selectedProducts]);
+        localStorage.setItem('saleDate', saleDate.toISOString());
+    }, [selectedProducts, saleDate]);
 
     const filteredProducts = productList.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -149,6 +180,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         try {
             // Preparar los datos para enviar al backend
             const saleData = {
+                date: saleDate.toISOString().split('T')[0], // Formatear fecha
                 items: selectedProducts.map(product => ({
                     id: product.id,
                     name: product.name,
@@ -164,12 +196,14 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             // Mostrar mensaje de éxito
             alert(`Venta guardada con ID: ${response.data.id}`);
 
-            // Limpiar los productos seleccionados
-            clearSales();
+            // Limpiar los productos seleccionados y el local storage
+            setSelectedProducts([]);
+            localStorage.removeItem('selectedProducts');
         } catch (error) {
             try {
-                // Preparar los datos para enviar al backend
+                // Intentar con el localhost
                 const saleData = {
+                    date: saleDate.toISOString().split('T')[0], // Formatear fecha
                     items: selectedProducts.map(product => ({
                         id: product.id,
                         name: product.name,
@@ -179,15 +213,18 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                     }))
                 };
 
-                // Enviar solicitud al endpoint de ventas
                 const response = await axios.post('http://localhost:3001/api/sales', saleData);
 
                 // Mostrar mensaje de éxito
                 alert(`Venta guardada con ID: ${response.data.id}`);
+
+                // Limpiar los productos seleccionados y el local storage
+                setSelectedProducts([]);
+                localStorage.removeItem('selectedProducts');
             } catch (error) {
                 console.error('Error al guardar la venta:', error);
                 alert('Error al guardar la venta');
-                alert(error);
+                alert(error instanceof Error ? error.message : 'Unknown error');
             }
         }
     };
@@ -217,6 +254,32 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                         )}
                     </CardHeader>
                     <CardContent>
+                        {/* Nuevo Popover Calendar */}
+                        <div className="flex items-center gap-2 mb-4">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal bg-green-100",
+                                            !saleDate && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4 bg-green-100" />
+                                        {formatDateSpanish(saleDate)}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={saleDate}
+                                        onSelect={(date) => date && setSaleDate(date)}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
                         <div className="flex items-center gap-2 mb-4">
                             <Search className="w-5 h-5 text-gray-400" />
                             <Input
@@ -307,15 +370,17 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                                         </tr>
                                     </tbody>
                                 </table>
-                                <Button onClick={exportToExcel}>
-                                    Exportar a Excel
-                                </Button>
-                                <Button
-                                    variant="default"
-                                    onClick={handleSaveSale}
-                                >
-                                    Guardar Venta
-                                </Button>
+                                <div className="flex space-x-2">
+                                    <Button onClick={exportToExcel}>
+                                        Exportar a Excel
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        onClick={handleSaveSale}
+                                    >
+                                        Guardar Venta
+                                    </Button>
+                                </div>
                             </>
                         )}
                     </CardContent>

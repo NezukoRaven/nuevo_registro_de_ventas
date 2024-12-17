@@ -37,6 +37,7 @@ const initDb = async () => {
         await pool.query(`
         CREATE TABLE IF NOT EXISTS sales (
             id SERIAL PRIMARY KEY,
+            sale_date DATE NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -52,6 +53,7 @@ const initDb = async () => {
 
         CREATE TABLE IF NOT EXISTS sales_mama (
             id SERIAL PRIMARY KEY,
+            sale_date DATE NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         );
 
@@ -82,9 +84,10 @@ app.post('/api/sales', async (req, res) => {
         // Iniciar transacción
         await client.query('BEGIN');
 
-        // Crear nueva venta
+        // Crear nueva venta con fecha proporcionada
         const saleResult = await client.query(
-            'INSERT INTO sales DEFAULT VALUES RETURNING id'
+            'INSERT INTO sales (sale_date) VALUES ($1) RETURNING id',
+            [req.body.date]
         );
         const saleId = saleResult.rows[0].id;
 
@@ -131,6 +134,7 @@ app.get('/api/sales', async (_req, res) => {
         const result = await pool.query(`
     SELECT 
         s.id, 
+        s.sale_date,
         s.created_at, 
         json_agg(json_build_object(
             'id', si.id,
@@ -154,7 +158,7 @@ app.get('/api/sales', async (_req, res) => {
     }
 });
 
-// Endpoint para crear una nueva venta
+// Endpoint para crear una nueva venta para mama
 app.post('/api/sales_mama', async (req, res) => {
     const client = await pool.connect();
 
@@ -162,9 +166,10 @@ app.post('/api/sales_mama', async (req, res) => {
         // Iniciar transacción
         await client.query('BEGIN');
 
-        // Crear nueva venta
+        // Crear nueva venta con fecha proporcionada
         const saleResult = await client.query(
-            'INSERT INTO sales_mama DEFAULT VALUES RETURNING id'
+            'INSERT INTO sales_mama (sale_date) VALUES ($1) RETURNING id',
+            [req.body.date]
         );
         const saleId = saleResult.rows[0].id;
 
@@ -205,12 +210,13 @@ app.post('/api/sales_mama', async (req, res) => {
     }
 });
 
-// Endpoint para obtener todas las ventas
+// Endpoint para obtener todas las ventas de mama
 app.get('/api/sales_mama', async (_req, res) => {
     try {
         const result = await pool.query(`
     SELECT 
         s.id, 
+        s.sale_date,
         s.created_at, 
         json_agg(json_build_object(
             'id', si.id,
@@ -233,6 +239,7 @@ app.get('/api/sales_mama', async (_req, res) => {
         res.status(500).json({ error: 'Error al obtener las ventas' });
     }
 });
+
 
 // Iniciar servidor
 const PORT = process.env.PORT || 3001;

@@ -2,7 +2,14 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Input } from '../components/ui/input';
 import { Button } from '../components/ui/button';
-import { Search, ArrowLeft } from 'lucide-react';
+import { 
+    Popover, 
+    PopoverContent, 
+    PopoverTrigger 
+} from '../components/ui/popover';
+import { Calendar } from '../components/ui/calendar';
+import { Search, ArrowLeft, CalendarIcon } from 'lucide-react';
+import { cn } from '../lib/utils';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
 
@@ -26,6 +33,23 @@ interface SelectedProduct extends Product {
 interface SalesFormProps {
     onBack: () => void;
 }
+
+const formatDateSpanish = (date: Date) => {
+    const days = [
+        'domingo', 'lunes', 'martes', 'miércoles', 'jueves', 'viernes', 'sábado'
+    ];
+    const months = [
+        'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 
+        'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+    ];
+
+    const dayName = days[date.getDay()];
+    const dayNumber = date.getDate();
+    const monthName = months[date.getMonth()];
+    const year = date.getFullYear();
+
+    return `${dayName} ${dayNumber} de ${monthName} de ${year}`;
+};
 
 const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     const productList: Product[] = [
@@ -60,16 +84,22 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     ];
 
     const [searchTerm, setSearchTerm] = useState('');
-    const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(() => {
-        const saved = localStorage.getItem('selectedProducts');
+    const [selectedProducts_mama, setSelectedProducts_mama] = useState<SelectedProduct[]>(() => {
+        const saved = localStorage.getItem('selectedProducts_mama');
         return saved ? JSON.parse(saved) : [];
     });
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState<string>('');
+    
+    const [saleDate, setSaleDate] = useState<Date>(() => {
+        const savedDate = localStorage.getItem('saleDate');
+        return savedDate ? new Date(savedDate) : new Date();
+    });
 
     useEffect(() => {
-        localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
-    }, [selectedProducts]);
+        localStorage.setItem('selectedProducts_mama', JSON.stringify(selectedProducts_mama));
+        localStorage.setItem('saleDate', saleDate.toISOString());
+    }, [selectedProducts_mama, saleDate]);
 
     const filteredProducts = productList.filter(product =>
         product.name.toLowerCase().includes(searchTerm.toLowerCase()));
@@ -99,8 +129,8 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     const addProduct = () => {
         if (selectedProduct && quantity && parseInt(quantity) > 0) {
             const total = calculateTotal(quantity, selectedProduct);
-            setSelectedProducts([
-                ...selectedProducts,
+            setSelectedProducts_mama([
+                ...selectedProducts_mama,
                 {
                     ...selectedProduct,
                     quantity: parseInt(quantity),
@@ -113,8 +143,8 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     };
 
     const clearSales = () => {
-        setSelectedProducts([]);
-        localStorage.removeItem('selectedProducts');
+        setSelectedProducts_mama([]);
+        localStorage.removeItem('selectedProducts_mama');
     };
 
     const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -124,7 +154,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         }
     };
 
-    const totalVenta = selectedProducts.reduce((acc, product) => acc + product.total, 0);
+    const totalVenta = selectedProducts_mama.reduce((acc, product) => acc + product.total, 0);
 
     const getPromotionText = (product: Product) => {
         if (product.promotion) {
@@ -134,7 +164,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     };
 
     const exportToExcel = () => {
-        const rows = selectedProducts.map(product => ({
+        const rows = selectedProducts_mama.map(product => ({
             'Producto': product.name,
             'Cantidad': product.quantity,
             'Precio Unitario': product.price,
@@ -148,7 +178,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     };
 
     const handleSaveSale = async () => {
-        if (selectedProducts.length === 0) {
+        if (selectedProducts_mama.length === 0) {
             alert('No hay productos para guardar');
             return;
         }
@@ -156,7 +186,8 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         try {
             // Preparar los datos para enviar al backend
             const saleData = {
-                items: selectedProducts.map(product => ({
+                date: saleDate.toISOString().split('T')[0], // Formatear fecha
+                items: selectedProducts_mama.map(product => ({
                     id: product.id,
                     name: product.name,
                     price: product.price,
@@ -164,6 +195,16 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                     total: product.total
                 }))
             };
+
+            // Guardar en el historial de ventas en localStorage
+            const salesHistory = JSON.parse(localStorage.getItem('salesHistory_mama') || '[]');
+            const newSale = {
+                ...saleData,
+                timestamp: new Date().toISOString(),
+                id: new Date().getTime() // Usar timestamp como ID único
+            };
+            salesHistory.push(newSale);
+            localStorage.setItem('salesHistory_mama', JSON.stringify(salesHistory));
 
             // Enviar solicitud al endpoint de ventas
             const response = await axios.post('http://34.136.163.22:3001/api/sales_mama', saleData);
@@ -175,9 +216,10 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             clearSales();
         } catch (error) {
             try {
-                // Preparar los datos para enviar al backend
+                // Intentar con el localhost
                 const saleData = {
-                    items: selectedProducts.map(product => ({
+                    date: saleDate.toISOString().split('T')[0], // Formatear fecha
+                    items: selectedProducts_mama.map(product => ({
                         id: product.id,
                         name: product.name,
                         price: product.price,
@@ -186,15 +228,27 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                     }))
                 };
 
-                // Enviar solicitud al endpoint de ventas
+                // Guardar en el historial de ventas en localStorage
+                const salesHistory = JSON.parse(localStorage.getItem('salesHistory_mama') || '[]');
+                const newSale = {
+                    ...saleData,
+                    timestamp: new Date().toISOString(),
+                    id: new Date().getTime() // Usar timestamp como ID único
+                };
+                salesHistory.push(newSale);
+                localStorage.setItem('salesHistory_mama', JSON.stringify(salesHistory));
+
                 const response = await axios.post('http://localhost:3001/api/sales_mama', saleData);
-                alert(response.status)
+
                 // Mostrar mensaje de éxito
-                alert(`Venta mama guardada con ID: ${response.data.id}`);
+                alert(`Venta guardada con ID: ${response.data.id}`);
+
+                // Limpiar los productos seleccionados
+                clearSales();
             } catch (error) {
                 console.error('Error al guardar la venta:', error);
                 alert('Error al guardar la venta');
-                alert(error);
+                alert(error instanceof Error ? error.message : 'Unknown error');
             }
         }
     };
@@ -214,7 +268,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                             </Button>
                             <CardTitle>Formulario de Ventas</CardTitle>
                         </div>
-                        {selectedProducts.length > 0 && (
+                        {selectedProducts_mama.length > 0 && (
                             <Button
                                 variant="destructive"
                                 onClick={clearSales}
@@ -224,6 +278,32 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                         )}
                     </CardHeader>
                     <CardContent>
+                        {/* Nuevo Popover Calendar */}
+                        <div className="flex items-center gap-2 mb-4">
+                            <Popover>
+                                <PopoverTrigger asChild>
+                                    <Button
+                                        variant={"outline"}
+                                        className={cn(
+                                            "w-full justify-start text-left font-normal bg-green-100",
+                                            !saleDate && "text-muted-foreground"
+                                        )}
+                                    >
+                                        <CalendarIcon className="mr-2 h-4 w-4 bg-green-100" />
+                                        {formatDateSpanish(saleDate)}
+                                    </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                    <Calendar
+                                        mode="single"
+                                        selected={saleDate}
+                                        onSelect={(date) => date && setSaleDate(date)}
+                                        initialFocus
+                                    />
+                                </PopoverContent>
+                            </Popover>
+                        </div>
+
                         <div className="flex items-center gap-2 mb-4">
                             <Search className="w-5 h-5 text-gray-400" />
                             <Input
@@ -281,7 +361,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                             </div>
                         )}
 
-                        {selectedProducts.length > 0 && (
+                        {selectedProducts_mama.length > 0 && (
                             <>
                                 <table className="w-full mb-4 text-sm sm:text-base">
                                     <thead>
@@ -293,7 +373,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                                         </tr>
                                     </thead>
                                     <tbody>
-                                        {selectedProducts.map((product, index) => (
+                                        {selectedProducts_mama.map((product, index) => (
                                             <tr key={index}>
                                                 <td>
                                                     {product.name}
@@ -314,15 +394,17 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                                         </tr>
                                     </tbody>
                                 </table>
-                                <Button onClick={exportToExcel}>
-                                    Exportar a Excel
-                                </Button>
-                                <Button
-                                    variant="default"
-                                    onClick={handleSaveSale}
-                                >
-                                    Guardar Venta
-                                </Button>
+                                <div className="flex space-x-2">
+                                    <Button onClick={exportToExcel}>
+                                        Exportar a Excel
+                                    </Button>
+                                    <Button
+                                        variant="default"
+                                        onClick={handleSaveSale}
+                                    >
+                                        Guardar Venta
+                                    </Button>
+                                </div>
                             </>
                         )}
                     </CardContent>

@@ -29,7 +29,8 @@ interface SaleItem {
 
 interface Sale {
     id: number;
-    created_at: string;
+    sale_date: string;
+    //created_at: string;
     items: SaleItem[];
     total_sale: number;
 }
@@ -114,7 +115,7 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
     const groupSalesByDate = (sales: Sale[]) => {
         const grouped: { [date: string]: Sale[] } = {};
         sales.forEach(sale => {
-            const date = new Date(sale.created_at).toLocaleDateString();
+            const date = new Date(sale.sale_date).toLocaleDateString();
             if (!grouped[date]) {
                 grouped[date] = [];
             }
