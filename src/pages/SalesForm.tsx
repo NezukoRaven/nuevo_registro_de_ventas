@@ -74,6 +74,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         { id: 19, name: 'Aloe cafe cuadrado', price: 5000 },
         { id: 20, name: 'Cactus chico', price: 3000 },
         { id: 21, name: 'Aloe chico', price: 3000 },
+{ id: 5, name: 'Cajitas', price: 300, promotion: { quantity: 4, price: 1000 } },
     ];
 
     const [searchTerm, setSearchTerm] = useState('');
