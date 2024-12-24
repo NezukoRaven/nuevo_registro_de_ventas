@@ -6,10 +6,14 @@ const Home: React.FC<{
     onNavigateToSalesForm?: () => void;
     onNavigateToSalesForm2?: () => void;
     onNavigateToListadeVentas?: () => void;
+    onNavigateToProductManagement?: () => void;
+    onNavigateToHello?: () => void;
+
 }> = ({
     onNavigateToSalesForm = () => { },
     onNavigateToSalesForm2 = () => { },
-    onNavigateToListadeVentas = () => { }
+    onNavigateToListadeVentas = () => { },
+    onNavigateToProductManagement = () => { },
 }) => {
         return (
             <div className="justify-center items-center min-h-screen bg-gray-100 w-full absolute inset-0">
@@ -38,6 +42,14 @@ const Home: React.FC<{
                             className="w-full"
                         >
                             Ir a la lista de Ventas
+                        </Button>
+                        <Button
+                            onClick={onNavigateToProductManagement}
+                            variant="secondary"
+                            className="w-full"
+                        >
+                            Ir a administacion de productos
+
                         </Button>
                     </CardContent>
                 </Card>

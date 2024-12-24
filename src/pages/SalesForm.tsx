@@ -52,31 +52,10 @@ const formatDateSpanish = (date: Date) => {
 };
 
 const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
-    const productList: Product[] = [
-        { id: 1, name: 'Papel Couche', price: 400, promotion: { quantity: 3, price: 1000 } },
-        { id: 2, name: 'Papel Normal', price: 300, promotion: { quantity: 5, price: 1000 } },
-        { id: 3, name: 'Aro', price: 9000 },
-        { id: 4, name: 'Pilas', price: 200, promotion: { quantity: 4, price: 500 } },
-        { id: 5, name: 'Sobre Pequeño', price: 300, promotion: { quantity: 4, price: 1000 } },
-        { id: 6, name: 'Sobre Mediano', price: 500 },
-        { id: 7, name: 'Sobre Grande', price: 1000 },
-        { id: 8, name: 'Scotch', price: 200, promotion: { quantity: 6, price: 1000 } },
-        { id: 9, name: 'Cinta Chica', price: 200, promotion: { quantity: 3, price: 500 } },
-        { id: 10, name: 'Cinta Grande', price: 300, promotion: { quantity: 4, price: 1000 } },
-        { id: 11, name: 'Nieves', price: 600, promotion: { quantity: 2, price: 1000 } },
-        { id: 12, name: 'Rosas', price: 200, promotion: { quantity: 8, price: 1000 } },
-        { id: 13, name: 'Dino Grande', price: 9000 },
-        { id: 14, name: 'Dino Chico', price: 6000 },
-        { id: 15, name: 'Tarjetas', price: 100 },
-        { id: 16, name: 'Serpentinas', price: 700, promotion: { quantity: 3, price: 2000 } },
-        { id: 17, name: 'Cactus plomo', price: 5000 },
-        { id: 18, name: 'Cactus negro', price: 5000 },
-        { id: 19, name: 'Aloe cafe cuadrado', price: 5000 },
-        { id: 20, name: 'Cactus chico', price: 3000 },
-        { id: 21, name: 'Aloe chico', price: 3000 },
-{ id: 5, name: 'Cajitas', price: 300, promotion: { quantity: 4, price: 1000 } },
-    ];
 
+
+    const [productList, setProductList] = useState<Product[]>([]);
+    const [isLoading, setIsLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [selectedProducts, setSelectedProducts] = useState<SelectedProduct[]>(() => {
         const saved = localStorage.getItem('selectedProducts');
@@ -84,12 +63,37 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     });
     const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
     const [quantity, setQuantity] = useState<string>('');
-
-    // Nuevo estado para manejar la fecha con Date
     const [saleDate, setSaleDate] = useState<Date>(() => {
         const savedDate = localStorage.getItem('saleDate');
         return savedDate ? new Date(savedDate) : new Date();
     });
+
+    useEffect(() => {
+        const fetchProducts = async () => {
+            try {
+                const [response1, response2] = await Promise.all([
+                    axios.get('http://34.136.163.22:3001/api/products/1'),
+                    axios.get('http://34.136.163.22:3001/api/products/2')
+                ]);
+                setProductList([...response1.data, ...response2.data]);
+            } catch (error) {
+                try {
+                    const [response1, response2] = await Promise.all([
+                        axios.get('http://localhost:3001/api/products/1'),
+                        axios.get('http://localhost:3001/api/products/2')
+                    ]);
+                    setProductList([...response1.data, ...response2.data]);
+                } catch (error) {
+                    console.error('Error fetching products:', error);
+                    alert('Error al cargar productos');
+                }
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchProducts();
+    }, []);
 
     useEffect(() => {
         localStorage.setItem('selectedProducts', JSON.stringify(selectedProducts));
@@ -255,8 +259,12 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                         )}
                     </CardHeader>
                     <CardContent>
-                        {/* Nuevo Popover Calendar */}
-                        <div className="flex items-center gap-2 mb-4">
+            {isLoading ? (
+                <div className="text-center py-4">Cargando productos...</div>
+            ) : (
+                <div>
+                    {/* Nuevo Popover Calendar */}
+                    <div className="flex items-center gap-2 mb-4">
                             <Popover>
                                 <PopoverTrigger asChild>
                                     <Button
@@ -384,6 +392,8 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                                 </div>
                             </>
                         )}
+                </div>
+            )}
                     </CardContent>
                 </Card>
             </div>
