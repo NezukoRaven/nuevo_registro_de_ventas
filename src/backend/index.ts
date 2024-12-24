@@ -8,8 +8,8 @@ import { initDb } from './config/database';
 const app = express();
 
 app.use(cors({
-    //origin: ['http://localhost:5173', 'http://34.136.163.22:5173']
-    origin: ['http://localhost:5173', 'http://192.168.1.95:5173']
+    origin: ['http://localhost:5173', 'http://34.136.163.22:5173']
+
 }));
 app.use(express.json());
 
