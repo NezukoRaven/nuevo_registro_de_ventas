@@ -28,7 +28,7 @@ interface NewProduct {
 }
 
 // API endpoints
-const API_URL = 'http://localhost:3001';
+const API_URL = ['http://localhost:3001','http://34.136.163.22:3001'];
 
 const api = {
     getProducts: async (listNumber: number): Promise<Product[]> => {
