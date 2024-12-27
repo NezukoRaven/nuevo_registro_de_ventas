@@ -12,6 +12,7 @@ import { Search, ArrowLeft, CalendarIcon } from 'lucide-react';
 import { cn } from '../lib/utils';
 import * as XLSX from 'xlsx';
 import axios from 'axios';
+import apiConfig from '../../apiConfig';
 
 interface Promotion {
     quantity: number;
@@ -71,22 +72,16 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
     useEffect(() => {
         const fetchProducts = async () => {
             try {
+                const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products);
+                alert(`${baseUrl}${apiConfig.endpoints.products}`);
                 const [response1, response2] = await Promise.all([
-                    axios.get('http://34.136.163.22:3001/api/products/1'),
-                    axios.get('http://34.136.163.22:3001/api/products/2')
+                    axios.get(`${baseUrl}${apiConfig.endpoints.products}/1`),
+                    axios.get(`${baseUrl}${apiConfig.endpoints.products}/2`)
                 ]);
                 setProductList([...response1.data, ...response2.data]);
             } catch (error) {
-                try {
-                    const [response1, response2] = await Promise.all([
-                        axios.get('http://localhost:3001/api/products/1'),
-                        axios.get('http://localhost:3001/api/products/2')
-                    ]);
-                    setProductList([...response1.data, ...response2.data]);
-                } catch (error) {
-                    console.error('Error fetching products:', error);
-                    alert('Error al cargar productos');
-                }
+                console.error('Error fetching products:', error);
+                alert('Error al cargar productos');
             } finally {
                 setIsLoading(false);
             }
@@ -188,15 +183,18 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                 date: saleDate.toISOString().split('T')[0], // Formatear fecha
                 items: selectedProducts.map(product => ({
                     id: product.id,
-                    name: product.name,
+                    product_name: product.name,
                     price: product.price,
                     quantity: product.quantity,
                     total: product.total
                 }))
             };
 
+            // Obtener baseUrl
+            const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.form1);
+
             // Enviar solicitud al endpoint de ventas
-            const response = await axios.post('http://34.136.163.22:3001/api/sales', saleData);
+            const response = await axios.post(`${baseUrl}${apiConfig.endpoints.form1}`, saleData);
 
             // Mostrar mensaje de éxito
             alert(`Venta guardada con ID: ${response.data.id}`);
@@ -205,6 +203,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             setSelectedProducts([]);
             localStorage.removeItem('selectedProducts');
         } catch (error) {
+
             try {
                 // Intentar con el localhost
                 const saleData = {
@@ -218,8 +217,11 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                     }))
                 };
 
-                const response = await axios.post('http://localhost:3001/api/sales', saleData);
 
+                const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.form1);
+
+                // Enviar solicitud al endpoint de ventas
+                const response = await axios.post(`${baseUrl}${apiConfig.endpoints.form1}`, saleData);
                 // Mostrar mensaje de éxito
                 alert(`Venta guardada con ID: ${response.data.id}`);
 
@@ -229,6 +231,7 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
             } catch (error) {
                 console.error('Error al guardar la venta:', error);
                 alert('Error al guardar la venta');
+
                 alert(error instanceof Error ? error.message : 'Unknown error');
             }
         }
@@ -259,141 +262,141 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
                         )}
                     </CardHeader>
                     <CardContent>
-            {isLoading ? (
-                <div className="text-center py-4">Cargando productos...</div>
-            ) : (
-                <div>
-                    {/* Nuevo Popover Calendar */}
-                    <div className="flex items-center gap-2 mb-4">
-                            <Popover>
-                                <PopoverTrigger asChild>
-                                    <Button
-                                        variant={"outline"}
-                                        className={cn(
-                                            "w-full justify-start text-left font-normal bg-green-100",
-                                            !saleDate && "text-muted-foreground"
-                                        )}
-                                    >
-                                        <CalendarIcon className="mr-2 h-4 w-4 bg-green-100" />
-                                        {formatDateSpanish(saleDate)}
-                                    </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-auto p-0">
-                                    <Calendar
-                                        mode="single"
-                                        selected={saleDate}
-                                        onSelect={(date) => date && setSaleDate(date)}
-                                        initialFocus
-                                    />
-                                </PopoverContent>
-                            </Popover>
-                        </div>
-
-                        <div className="flex items-center gap-2 mb-4">
-                            <Search className="w-5 h-5 text-gray-400" />
-                            <Input
-                                type="text"
-                                placeholder="Buscar producto..."
-                                value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                                className="flex-1"
-                            />
-                        </div>
-
-                        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4 max-h-[50vh] overflow-y-auto">
-                            {filteredProducts.map(product => (
-                                <div
-                                    key={product.id}
-                                    className={`p-2 border rounded cursor-pointer ${selectedProduct?.id === product.id ? 'bg-blue-100 border-blue-500' : ''}`}
-                                    onClick={() => setSelectedProduct(product)}
-                                >
-                                    <div>{product.name} - ${product.price}</div>
-                                    {product.promotion && (
-                                        <div className="text-xs sm:text-sm text-green-600">
-                                            Promoción: {getPromotionText(product)}
-                                        </div>
-                                    )}
+                        {isLoading ? (
+                            <div className="text-center py-4">Cargando productos...</div>
+                        ) : (
+                            <div>
+                                {/* Nuevo Popover Calendar */}
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Popover>
+                                        <PopoverTrigger asChild>
+                                            <Button
+                                                variant={"outline"}
+                                                className={cn(
+                                                    "w-full justify-start text-left font-normal bg-green-100",
+                                                    !saleDate && "text-muted-foreground"
+                                                )}
+                                            >
+                                                <CalendarIcon className="mr-2 h-4 w-4 bg-green-100" />
+                                                {formatDateSpanish(saleDate)}
+                                            </Button>
+                                        </PopoverTrigger>
+                                        <PopoverContent className="w-auto p-0">
+                                            <Calendar
+                                                mode="single"
+                                                selected={saleDate}
+                                                onSelect={(date) => date && setSaleDate(date)}
+                                                initialFocus
+                                            />
+                                        </PopoverContent>
+                                    </Popover>
                                 </div>
-                            ))}
-                        </div>
 
-                        {selectedProduct && (
-                            <div className="flex flex-col gap-2 mb-4">
-                                <div className="flex gap-2">
+                                <div className="flex items-center gap-2 mb-4">
+                                    <Search className="w-5 h-5 text-gray-400" />
                                     <Input
-                                        type="number"
-                                        min="0"
-                                        value={quantity}
-                                        onChange={handleQuantityChange}
-                                        className="w-24"
-                                        placeholder="Cantidad"
+                                        type="text"
+                                        placeholder="Buscar producto..."
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                        className="flex-1"
                                     />
-                                    <Button
-                                        onClick={addProduct}
-                                        disabled={!quantity || parseInt(quantity) <= 0}
-                                    >
-                                        Agregar
-                                    </Button>
                                 </div>
-                                {selectedProduct.promotion &&
-                                    quantity &&
-                                    parseInt(quantity) >= selectedProduct.promotion.quantity && (
-                                        <div className="text-green-600">
-                                            ¡Promoción aplicada!
-                                            Ahorras: ${calculateSavings(quantity, selectedProduct)}
+
+                                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2 mb-4 max-h-[50vh] overflow-y-auto">
+                                    {filteredProducts.map(product => (
+                                        <div
+                                            key={product.id}
+                                            className={`p-2 border rounded cursor-pointer ${selectedProduct?.id === product.id ? 'bg-blue-100 border-blue-500' : ''}`}
+                                            onClick={() => setSelectedProduct(product)}
+                                        >
+                                            <div>{product.name} - ${product.price}</div>
+                                            {product.promotion && (
+                                                <div className="text-xs sm:text-sm text-green-600">
+                                                    Promoción: {getPromotionText(product)}
+                                                </div>
+                                            )}
                                         </div>
-                                    )}
+                                    ))}
+                                </div>
+
+                                {selectedProduct && (
+                                    <div className="flex flex-col gap-2 mb-4">
+                                        <div className="flex gap-2">
+                                            <Input
+                                                type="number"
+                                                min="0"
+                                                value={quantity}
+                                                onChange={handleQuantityChange}
+                                                className="w-24"
+                                                placeholder="Cantidad"
+                                            />
+                                            <Button
+                                                onClick={addProduct}
+                                                disabled={!quantity || parseInt(quantity) <= 0}
+                                            >
+                                                Agregar
+                                            </Button>
+                                        </div>
+                                        {selectedProduct.promotion &&
+                                            quantity &&
+                                            parseInt(quantity) >= selectedProduct.promotion.quantity && (
+                                                <div className="text-green-600">
+                                                    ¡Promoción aplicada!
+                                                    Ahorras: ${calculateSavings(quantity, selectedProduct)}
+                                                </div>
+                                            )}
+                                    </div>
+                                )}
+
+                                {selectedProducts.length > 0 && (
+                                    <>
+                                        <table className="w-full mb-4 text-sm sm:text-base">
+                                            <thead>
+                                                <tr>
+                                                    <th className="text-left">Producto</th>
+                                                    <th className="text-right">Cantidad</th>
+                                                    <th className="text-right">Precio</th>
+                                                    <th className="text-right">Total</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {selectedProducts.map((product, index) => (
+                                                    <tr key={index}>
+                                                        <td>
+                                                            {product.name}
+                                                            {product.promotion && product.quantity >= product.promotion.quantity && (
+                                                                <span className="text-sm text-green-600 ml-2">
+                                                                    (Promo: {getPromotionText(product)})
+                                                                </span>
+                                                            )}
+                                                        </td>
+                                                        <td className="text-right">{product.quantity}</td>
+                                                        <td className="text-right">${product.price}</td>
+                                                        <td className="text-right">${product.total}</td>
+                                                    </tr>
+                                                ))}
+                                                <tr className="font-bold">
+                                                    <td colSpan={3} className="text-right">Total Venta:</td>
+                                                    <td className="text-right">${totalVenta}</td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                        <div className="flex space-x-2">
+                                            <Button onClick={exportToExcel}>
+                                                Exportar a Excel
+                                            </Button>
+                                            <Button
+                                                variant="default"
+                                                onClick={handleSaveSale}
+                                            >
+                                                Guardar Venta
+                                            </Button>
+                                        </div>
+                                    </>
+                                )}
                             </div>
                         )}
-
-                        {selectedProducts.length > 0 && (
-                            <>
-                                <table className="w-full mb-4 text-sm sm:text-base">
-                                    <thead>
-                                        <tr>
-                                            <th className="text-left">Producto</th>
-                                            <th className="text-right">Cantidad</th>
-                                            <th className="text-right">Precio</th>
-                                            <th className="text-right">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {selectedProducts.map((product, index) => (
-                                            <tr key={index}>
-                                                <td>
-                                                    {product.name}
-                                                    {product.promotion && product.quantity >= product.promotion.quantity && (
-                                                        <span className="text-sm text-green-600 ml-2">
-                                                            (Promo: {getPromotionText(product)})
-                                                        </span>
-                                                    )}
-                                                </td>
-                                                <td className="text-right">{product.quantity}</td>
-                                                <td className="text-right">${product.price}</td>
-                                                <td className="text-right">${product.total}</td>
-                                            </tr>
-                                        ))}
-                                        <tr className="font-bold">
-                                            <td colSpan={3} className="text-right">Total Venta:</td>
-                                            <td className="text-right">${totalVenta}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <div className="flex space-x-2">
-                                    <Button onClick={exportToExcel}>
-                                        Exportar a Excel
-                                    </Button>
-                                    <Button
-                                        variant="default"
-                                        onClick={handleSaveSale}
-                                    >
-                                        Guardar Venta
-                                    </Button>
-                                </div>
-                            </>
-                        )}
-                </div>
-            )}
                     </CardContent>
                 </Card>
             </div>

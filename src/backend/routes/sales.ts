@@ -47,7 +47,14 @@ salesRouter.post('/', async (req: Request<{}, {}, Sales>, res: Response) => {
                 `INSERT INTO sale_items 
                 (sale_id, product_id, product_name, price, quantity, total) 
                 VALUES ($1, $2, $3, $4, $5, $6)`,
-                [saleId, item.id, item.product_name, item.price, item.quantity, item.total]
+                [
+                    saleId,
+                    item.id,        // product_id
+                    item.product_name, // nombre del producto
+                    item.price,     // precio
+                    item.quantity,  // cantidad
+                    item.total      // total
+                ]
             );
         }
 
@@ -56,7 +63,7 @@ salesRouter.post('/', async (req: Request<{}, {}, Sales>, res: Response) => {
     } catch (error) {
         await client.query('ROLLBACK');
         console.error('Error al guardar la venta:', error);
-        res.status(500).json({ error: 'Error al guardar la venta' });
+        res.status(500).json({ error: error instanceof Error ? error.message : 'Error desconocido' });
     } finally {
         client.release();
     }
