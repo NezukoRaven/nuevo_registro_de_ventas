@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card'
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs';
+import apiConfig from '../../apiConfig';
 
 interface Promotion {
     quantity: number;
@@ -28,17 +29,18 @@ interface NewProduct {
 }
 
 // API endpoints
-const API_URL = 'http://34.136.163.22:3001';
-
 const api = {
     getProducts: async (listNumber: number): Promise<Product[]> => {
-        const response = await fetch(`${API_URL}/api/products/${listNumber}`);
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products); // Obtener URL base
+        alert(baseUrl);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.products}/${listNumber}`);
         if (!response.ok) throw new Error('Error al obtener productos');
         return response.json();
     },
 
     createProduct: async (product: Omit<Product, 'id'>): Promise<Product> => {
-        const response = await fetch(`${API_URL}/api/products`, {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.products}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(product),
@@ -48,7 +50,8 @@ const api = {
     },
 
     updateProduct: async (id: number, product: Omit<Product, 'id'>): Promise<Product> => {
-        const response = await fetch(`${API_URL}/api/products/${id}`, {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.products}/${id}`, {
             method: 'PUT',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(product),
@@ -58,12 +61,14 @@ const api = {
     },
 
     deleteProduct: async (id: number): Promise<void> => {
-        const response = await fetch(`${API_URL}/api/products/${id}`, {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.products}/${id}`, {
             method: 'DELETE',
         });
         if (!response.ok) throw new Error('Error al eliminar producto');
     },
 };
+
 
 interface ProductManagementProps {
     onBack: () => void;
@@ -177,15 +182,15 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
         return (
             <div className="space-y-4">
                 <div className="flex items-center space-x-4">
-                            <Button
-                                variant="outline"
-                                size="icon"
-                                onClick={onBack}
-                            >
-                                <ArrowLeft className="h-4 w-4" />
-                            </Button>
-                            <CardTitle>Formulario de Ventas</CardTitle>
-                        </div>
+                    <Button
+                        variant="outline"
+                        size="icon"
+                        onClick={onBack}
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                    </Button>
+                    <CardTitle>Formulario de Ventas</CardTitle>
+                </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {products.map(product => (
                         <Card key={product.id} className="shadow-sm">

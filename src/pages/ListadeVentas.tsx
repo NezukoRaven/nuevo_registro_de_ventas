@@ -17,6 +17,7 @@ import {
     TableRow,
     TableHead
 } from '../components/ui/table';
+import apiConfig from '../../apiConfig';
 
 interface SaleItem {
     id: number;
@@ -39,10 +40,10 @@ interface ListadeVentasProps {
     onBack: () => void;
 }
 
-const SalesTable = ({ sales, title, onExport }: { 
-    sales: { [date: string]: Sale[] }, 
+const SalesTable = ({ sales, title, onExport }: {
+    sales: { [date: string]: Sale[] },
     title: string,
-    onExport: () => void 
+    onExport: () => void
 }) => (
     <Card className="w-full">
         <CardHeader className="bg-white p-4 border-b shadow-sm">
@@ -127,15 +128,17 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
     useEffect(() => {
         const fetchSales = async () => {
             try {
+                // Obtener la URL base correcta
+                const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.form1);
+
                 // Fetch regular sales
-                const regularResponse = await axios.get('http://34.136.163.22:3001/api/sales')
-                    .catch(() => axios.get('http://localhost:3001/api/sales'));
+                const regularResponse = await axios.get(`${baseUrl}${apiConfig.endpoints.form1}`);
                 setRegularSales(regularResponse.data);
 
                 // Fetch mama sales
-                const mamaResponse = await axios.get('http://34.136.163.22:3001/api/sales_mama')
-                    .catch(() => axios.get('http://localhost:3001/api/sales_mama'));
+                const mamaResponse = await axios.get(`${baseUrl}${apiConfig.endpoints.form2}`);
                 setMamaSales(mamaResponse.data);
+
             } catch (error) {
                 console.error('Error al obtener las ventas:', error);
                 alert('Error al obtener las ventas');

@@ -4,11 +4,10 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "start": "concurrently \"npm run start:frontend\" \"npm run start:backend\"",
-    "start:frontend": "vite",
-    "start:backend": "tsx src/backend/index.ts",
+    "start": "npm run build && npm run start:backend",
     "build": "vite build",
-    "build:backend": "tsc --project tsconfig.backend.json"
+    "build:backend": "tsc --project tsconfig.backend.json",
+    "start:backend": "tsx src/backend/index.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.0",
