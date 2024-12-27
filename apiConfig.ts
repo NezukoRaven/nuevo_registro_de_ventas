@@ -9,8 +9,8 @@ interface ApiConfig {
 const apiConfig: ApiConfig = {
     baseUrl: null,
     urls: [
-        'http://localhost:3001',
-        'http://34.136.163.22:3001',
+        'http://localhost:80',
+        'http://34.136.163.22:80',
     ],
     getApiUrl: async (endpoint, urls = apiConfig.urls) => {
         // Si ya se determinó una URL válida, usarla

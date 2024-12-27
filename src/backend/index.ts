@@ -10,7 +10,7 @@ import { dirname } from 'node:path';
 
 const app = express();
 
-const PORT = 3001;
+const PORT = 80;
 
 app.use(cors({
     //origin: ['http://localhost:5173', 'http://34.136.163.22:5173']
