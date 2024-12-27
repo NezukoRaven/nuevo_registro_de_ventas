@@ -32,7 +32,6 @@ interface NewProduct {
 const api = {
     getProducts: async (listNumber: number): Promise<Product[]> => {
         const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products); // Obtener URL base
-        alert(baseUrl);
         const response = await fetch(`${baseUrl}${apiConfig.endpoints.products}/${listNumber}`);
         if (!response.ok) throw new Error('Error al obtener productos');
         return response.json();
