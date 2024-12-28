@@ -11,6 +11,7 @@ const apiConfig: ApiConfig = {
     urls: [
         'http://localhost:80',
         'http://34.136.163.22:80',
+        'https://www.upkey.cl',
     ],
     getApiUrl: async (endpoint, urls = apiConfig.urls) => {
         // Si ya se determinó una URL válida, usarla
