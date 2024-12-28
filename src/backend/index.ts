@@ -1,12 +1,13 @@
 import express from 'express';
 import cors from 'cors';
-import productsRouter from './routes/products';
+import productsRoute from './routes/products';
 import salesRouter from './routes/sales';
 import salesMamaRouter from './routes/salesMama';
 import { initDb } from './config/database';
 import path from 'path';
 import { fileURLToPath } from 'url'; // Importa fileURLToPath
 import { dirname } from 'node:path';
+import productsMamaRouter from './routes/productsMama';
 
 const app = express();
 
@@ -18,7 +19,8 @@ app.use(cors({
 }));
 app.use(express.json());
 
-app.use('/api/products', productsRouter);
+app.use('/api/products', productsRoute);
+app.use('/api/products_mama', productsMamaRouter);
 app.use('/api/sales', salesRouter);
 app.use('/api/sales_mama', salesMamaRouter);
 

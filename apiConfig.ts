@@ -39,6 +39,7 @@ const apiConfig: ApiConfig = {
         form1: '/api/sales',
         form2: '/api/sales_mama',
         products: '/api/products',
+        productsMama: '/api/products_mama',
     }
 };
 

@@ -73,7 +73,6 @@ const SalesForm: React.FC<SalesFormProps> = ({ onBack }) => {
         const fetchProducts = async () => {
             try {
                 const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.products);
-                alert(`${baseUrl}${apiConfig.endpoints.products}`);
                 const [response1, response2] = await Promise.all([
                     axios.get(`${baseUrl}${apiConfig.endpoints.products}/1`),
                     axios.get(`${baseUrl}${apiConfig.endpoints.products}/2`)

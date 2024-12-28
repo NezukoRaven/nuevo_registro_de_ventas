@@ -31,6 +31,17 @@ export const initDb = async () => {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
             );
 
+            -- Tabla de productos
+            CREATE TABLE IF NOT EXISTS products_mama (
+                id SERIAL PRIMARY KEY,
+                name VARCHAR(255) NOT NULL,
+                price DECIMAL(10,2) NOT NULL,
+                promotion_quantity INTEGER,
+                promotion_price DECIMAL(10,2),
+                list_number INTEGER NOT NULL,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            );
+
             -- Tablas para ventas normales
             CREATE TABLE IF NOT EXISTS sales (
                 id SERIAL PRIMARY KEY,

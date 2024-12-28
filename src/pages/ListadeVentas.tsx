@@ -116,7 +116,7 @@ const ListaDeVentas: React.FC<ListadeVentasProps> = ({ onBack }) => {
     const groupSalesByDate = (sales: Sale[]) => {
         const grouped: { [date: string]: Sale[] } = {};
         sales.forEach(sale => {
-            const date = new Date(sale.sale_date).toLocaleDateString();
+            const date = new Date(sale.sale_date).toString();
             if (!grouped[date]) {
                 grouped[date] = [];
             }

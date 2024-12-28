@@ -69,6 +69,46 @@ const api = {
 };
 
 
+const api_mama = {
+    getProducts: async (listNumber: number): Promise<Product[]> => {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.productsMama); // Obtener URL base
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.productsMama}/${listNumber}`);
+        if (!response.ok) throw new Error('Error al obtener productos');
+        return response.json();
+    },
+
+    createProduct: async (product: Omit<Product, 'id'>): Promise<Product> => {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.productsMama);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.productsMama}`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product),
+        });
+        if (!response.ok) throw new Error('Error al crear producto');
+        return response.json();
+    },
+
+    updateProduct: async (id: number, product: Omit<Product, 'id'>): Promise<Product> => {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.productsMama);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.productsMama}/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(product),
+        });
+        if (!response.ok) throw new Error('Error al actualizar producto');
+        return response.json();
+    },
+
+    deleteProduct: async (id: number): Promise<void> => {
+        const baseUrl = await apiConfig.getApiUrl(apiConfig.endpoints.productsMama);
+        const response = await fetch(`${baseUrl}${apiConfig.endpoints.productsMama}/${id}`, {
+            method: 'DELETE',
+        });
+        if (!response.ok) throw new Error('Error al eliminar producto');
+    },
+};
+
+
 interface ProductManagementProps {
     onBack: () => void;
 }
@@ -94,7 +134,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
                 setIsLoading(true);
                 const [products1, products2] = await Promise.all([
                     api.getProducts(1),
-                    api.getProducts(2)
+                    api_mama.getProducts(2)
                 ]);
                 setList1(products1);
                 setList2(products2);
@@ -114,7 +154,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
 
     const handleSave = async (product: Product) => {
         try {
-            const updatedProduct = await api.updateProduct(product.id, {
+            const apiToUse = product.listNumber === 1 ? api : api_mama;
+            const updatedProduct = await apiToUse.updateProduct(product.id, {
                 name: product.name,
                 price: product.price,
                 promotion: product.promotion,
@@ -133,7 +174,8 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
 
     const handleDelete = async (productId: number, listNumber: number) => {
         try {
-            await api.deleteProduct(productId);
+            const apiToUse = listNumber === 1 ? api : api_mama;
+            await apiToUse.deleteProduct(productId);
 
             const setList = listNumber === 1 ? setList1 : setList2;
             const currentList = listNumber === 1 ? list1 : list2;
@@ -146,6 +188,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
 
     const handleCreate = async (listNumber: number) => {
         try {
+            const apiToUse = listNumber === 1 ? api : api_mama;
             const productData = {
                 name: newProduct.name,
                 price: Number(newProduct.price),
@@ -158,7 +201,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
                 } : {})
             };
 
-            const createdProduct = await api.createProduct(productData);
+            const createdProduct = await apiToUse.createProduct(productData);
 
             const setList = listNumber === 1 ? setList1 : setList2;
             const currentList = listNumber === 1 ? list1 : list2;
@@ -174,6 +217,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
         }
     };
 
+    // Rest of the component remains the same...
     const renderProductList = (products: Product[], listNumber: number) => {
         if (isLoading) return <div>Cargando productos...</div>;
         if (error) return <div className="text-red-500">Error: {error}</div>;
@@ -188,7 +232,7 @@ const ProductManagement: React.FC<ProductManagementProps> = ({ onBack }) => {
                     >
                         <ArrowLeft className="h-4 w-4" />
                     </Button>
-                    <CardTitle>Formulario de Ventas</CardTitle>
+                    <CardTitle>Formulario de Ventas - Lista {listNumber}</CardTitle>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {products.map(product => (

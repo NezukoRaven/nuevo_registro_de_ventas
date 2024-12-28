@@ -9,6 +9,17 @@ export interface Products {
     listNumber: number;
 }
 
+export interface ProductsMama {
+    id: number;
+    name: string;
+    price: number;
+    promotion?: {
+        quantity: number;
+        price: number;
+    };
+    listNumber: number;
+}
+
 export interface SalesItem {
     id: number;
     product_id: number;
@@ -35,4 +46,12 @@ export interface SalesMamaItem {
 export interface SalesMama {
     date: string;
     items: SalesMamaItem[];
+}
+
+export interface SaleParams {
+    id: string;
+}
+
+export interface SaleMamaParams {
+    id: string;
 }
